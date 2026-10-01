@@ -71,7 +71,7 @@ rm -rf feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/background/*
 
 
 # 为固件版本加上编译作者
-author="xiaomeng9597"
+author="kk160524"
 sed -i "s/DISTRIB_DESCRIPTION.*/DISTRIB_DESCRIPTION='%D %V %C by ${author}'/g" package/base-files/files/etc/openwrt_release
 sed -i "s/OPENWRT_RELEASE.*/OPENWRT_RELEASE=\"%D %V %C by ${author}\"/g" package/base-files/files/usr/lib/os-release
 cp -f $GITHUB_WORKSPACE/configfiles/99-default-settings-chinese package/emortal/default-settings/files/99-default-settings-chinese
@@ -105,6 +105,11 @@ git clone --depth=1 https://github.com/sirpdboy/luci-app-eqosplus package/luci-a
 
 #上游已经把编译器资源包删除了，先禁用吧
 sed -i 's/ci-llvm=true/ci-llvm=false/g' feeds/packages/lang/rust/Makefile
+
+
+# 编译时自动将 Rockchip DTS 中的 PCIe 限制从 Gen2(0x02) 修改为 Gen3(0x03)
+sed -i 's/max-link-speed = <0x02>;/max-link-speed = <0x03>;/g' $(find target/linux/rockchip/ -name "*.dtsi" -o -name "*.dts" -o -name "*.patch" 2>/dev/null)
+
 
 
 ./scripts/feeds update -a
