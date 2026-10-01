@@ -111,6 +111,10 @@ sed -i 's/ci-llvm=true/ci-llvm=false/g' feeds/packages/lang/rust/Makefile
 sed -i 's/max-link-speed = <0x02>;/max-link-speed = <0x03>;/g' $(find target/linux/rockchip/ -name "*.dtsi" -o -name "*.dts" -o -name "*.patch" 2>/dev/null)
 
 
+# 在 Device 定义的 DEVICE_PACKAGES 中追加 kmod-r8125 NVMe 固态硬盘驱动 风扇调速
+DEVICE_PACKAGES += kmod-nvme kmod-ata-ahci-dwc kmod-hwmon-pwmfan kmod-thermal kmod-r8125
+
+
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
