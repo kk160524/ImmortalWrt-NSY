@@ -115,6 +115,10 @@ sed -i 's/max-link-speed = <0x02>;/max-link-speed = <0x03>;/g' $(find target/lin
 DEVICE_PACKAGES += kmod-nvme kmod-ata-ahci-dwc kmod-hwmon-pwmfan kmod-thermal kmod-r8125
 
 
+# 防止 patch 或清理脚本误删 rust 依赖中的 .orig 文件
+find . -name "*.orig" -type f
+
+
 
 ./scripts/feeds update -a
 ./scripts/feeds install -a
