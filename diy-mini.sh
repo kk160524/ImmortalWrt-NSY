@@ -64,9 +64,14 @@ CONFIG_PACKAGE_kmod-hwmon-pwmfan=y
 CONFIG_PACKAGE_kmod-thermal=y
 EOF
 
-# 修复 Rust 编译时误删 .orig 文件的已知 Bug
-sed -i 's/ -exec rm -f {} +//g' scripts/patch-kernel.sh 2>/dev/null || true
-sed -i 's/find . -name "\*\.orig" -delete//g' scripts/patch-kernel.sh 2>/dev/null || true
+# 彻底修复 Rust 编译时误删 Cargo.toml.orig 的问题
+if [ -f "feeds/packages/lang/rust/Makefile" ]; then
+    # 替换 Rust Makefile 中的补丁清理行为
+    sed -i '/patch-kernel.sh/s/$/ || true/' feeds/packages/lang/rust/Makefile
+    
+    # 在 Rust 解压/补丁完成后，自动将所有 Cargo.toml 复制一份为 Cargo.toml.orig
+    sed -i '/Build\/Patch/a \ \tfind $(PKG_BUILD_DIR) -name "Cargo.toml" -exec cp {} {}.orig \\;' feeds/packages/lang/rust/Makefile
+fi
 
 # 更新并安装 Feeds
 ./scripts/feeds update -a
