@@ -115,8 +115,13 @@ sed -i 's/max-link-speed = <0x02>;/max-link-speed = <0x03>;/g' $(find target/lin
 DEVICE_PACKAGES += kmod-nvme kmod-ata-ahci-dwc kmod-hwmon-pwmfan kmod-thermal kmod-r8125
 
 
-# 防止 patch 或清理脚本误删 rust 依赖中的 .orig 文件
-find . -name "*.orig" -type f
+# 1. 禁用 patch 脚本对 .orig 文件的自动清理
+sed -i 's/ -exec rm -f {} +//g' scripts/patch-kernel.sh || true
+
+# 2. 为 rust 依赖补全必要的 .orig 备份文件
+if [ -d "feeds/packages/lang/rust" ]; then
+    find feeds/packages/lang/rust -type f -name "Cargo.toml" -exec cp {} {}.orig \; || true
+fi
 
 
 
