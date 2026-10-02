@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 
 # 修改默认IP
 # sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
@@ -66,11 +66,12 @@ EOF
 
 # 彻底修复 Rust 编译时误删 Cargo.toml.orig 的问题
 if [ -f "feeds/packages/lang/rust/Makefile" ]; then
-    # 替换 Rust Makefile 中的补丁清理行为
+    # 替换 Rust Makefile 中的补丁清理行为，防止误删
     sed -i '/patch-kernel.sh/s/$/ || true/' feeds/packages/lang/rust/Makefile
     
-    # 在 Rust 解压/补丁完成后，自动将所有 Cargo.toml 复制一份为 Cargo.toml.orig
-    sed -i '/Build\/Patch/a \ \tfind $(PKG_BUILD_DIR) -name "Cargo.toml" -exec cp {} {}.orig \\;' feeds/packages/lang/rust/Makefile
+    # 使用 awk 精确插入带有真实 Tab 制表符的补丁复制命令
+    awk '/Build\/Patch/ {print; print "\tfind $(PKG_BUILD_DIR) -name \"Cargo.toml\" -exec cp {} {}.orig \\;"; next}1' feeds/packages/lang/rust/Makefile > feeds/packages/lang/rust/Makefile.new
+    mv -f feeds/packages/lang/rust/Makefile.new feeds/packages/lang/rust/Makefile
 fi
 
 # 更新并安装 Feeds
