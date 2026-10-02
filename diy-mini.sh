@@ -67,15 +67,8 @@ CONFIG_PACKAGE_kmod-hwmon-pwmfan=y
 CONFIG_PACKAGE_kmod-thermal=y
 EOF
 
-# 彻底修复 Rust 编译时误删 Cargo.toml.orig 的问题（此时 Rust Makefile 已存在）
-if [ -f "feeds/packages/lang/rust/Makefile" ]; then
-    # 替换 Rust Makefile 中的补丁清理行为，防止误删
-    sed -i '/patch-kernel.sh/s/$/ || true/' feeds/packages/lang/rust/Makefile
-    
-    # 使用 awk 精确插入带有真实 Tab 制表符的补丁复制命令
-    awk '/Build\/Patch/ {print; print "\tfind \$(PKG_BUILD_DIR) -name \"Cargo.toml\" -exec cp {} {}.orig \\;"; next}1' feeds/packages/lang/rust/Makefile > feeds/packages/lang/rust/Makefile.new
-    mv -f feeds/packages/lang/rust/Makefile.new feeds/packages/lang/rust/Makefile
-fi
+# 从根源上拦截 OpenWrt 核心打补丁脚本对 .orig 文件的清理动作，彻底修复 Rust 编译报错
+sed -i '/\.orig/d' scripts/patch-kernel.sh
 
 # 2. 最后统一安装 Feeds 插件
 ./scripts/feeds install -a
